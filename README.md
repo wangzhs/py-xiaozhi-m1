@@ -2,6 +2,7 @@
 ***用python实现的小智客户端***,用于代码学习和在没有硬件条件下体验AI小智的语音功能</br>
 厡项目作者地址[xiaozhi-esp32](https://github.com/78/xiaozhi-esp32)
 
+**注意需要手动修改脚本中的全局变量MAC_ADDR,以便区分不同的客户端**
 ## windows需要安装依赖
 * pip 安装 pyaudio paho pyaudio keyboard opuslib
 * 将libopus_win32_x64.zip解压至C:\Windows\System32目录中
