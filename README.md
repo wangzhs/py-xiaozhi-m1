@@ -1,5 +1,5 @@
 # py-xiaozhi
-***用python实现的小智客户端***,用于代码学些和在没有硬件条件下体验AI小智的语音功能</br>
+***用python实现的小智客户端***,用于代码学习和在没有硬件条件下体验AI小智的语音功能</br>
 厡项目作者地址[xiaozhi-esp32](https://github.com/78/xiaozhi-esp32)
 
 ## windows需要安装依赖
