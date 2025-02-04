@@ -18,7 +18,7 @@ from os import urandom
 import logging
 
 OTA_VERSION_URL = 'https://api.tenclass.net/xiaozhi/ota/'
-MAC_ADDR = 'cc:a3:95:2d:b4:bc'
+MAC_ADDR = 'ab:63:95:2d:b4:bc'
 # {"mqtt":{"endpoint":"post-cn-apg3xckag01.mqtt.aliyuncs.com","client_id":"GID_test@@@cc_ba_97_20_b4_bc",
 # "username":"Signature|LTAI5tF8J3CrdWmRiuTjxHbF|post-cn-apg3xckag01","password":"0mrkMFELXKyelhuYy2FpGDeCigU=",
 # "publish_topic":"device-server","subscribe_topic":"devices"},"firmware":{"version":"0.9.9","url":""}}
