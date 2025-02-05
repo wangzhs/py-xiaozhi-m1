@@ -16,9 +16,10 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from os import urandom
 import logging
+from pynput import keyboard as pynput_keyboard
 
 OTA_VERSION_URL = 'https://api.tenclass.net/xiaozhi/ota/'
-MAC_ADDR = 'ab:63:95:2d:b4:bc'
+MAC_ADDR = 'cd:62:94:2d:b4:ba'
 # {"mqtt":{"endpoint":"post-cn-apg3xckag01.mqtt.aliyuncs.com","client_id":"GID_test@@@cc_ba_97_20_b4_bc",
 # "username":"Signature|LTAI5tF8J3CrdWmRiuTjxHbF|post-cn-apg3xckag01","password":"0mrkMFELXKyelhuYy2FpGDeCigU=",
 # "publish_topic":"device-server","subscribe_topic":"devices"},"firmware":{"version":"0.9.9","url":""}}
@@ -85,6 +86,7 @@ def get_ota_version():
                            "ip": "192.168.124.38","mac":"cc:ba:97:20:b4:bc"}}
 
     response = requests.post(OTA_VERSION_URL, headers=header, data=json.dumps(post_data))
+    print('=========================')
     print(response.text)
     logging.info(f"get version: {response}")
     mqtt_info = response.json()['mqtt']
@@ -313,6 +315,16 @@ def on_space_key_release(event):
         push_mqtt_msg(msg)
 
 
+def on_press(key):
+    if key == pynput_keyboard.Key.space:
+        on_space_key_press(None)
+
+def on_release(key):
+    if key == pynput_keyboard.Key.space:
+        on_space_key_release(None)
+    # Stop listener
+    if key == pynput_keyboard.Key.esc:
+        return False
 def run():
     global mqtt_info
     # 获取mqtt与版本信息
@@ -320,8 +332,11 @@ def run():
     subscribe_topic = mqtt_info['subscribe_topic'].split("/")[0] + '/p2p/GID_test@@@' + MAC_ADDR.replace(':', '_')
     print(f"subscribe topic: {subscribe_topic}")
     # 监听键盘按键，当按下空格键时，发送listen消息
-    keyboard.on_press_key(" ", on_space_key_press)
-    keyboard.on_release_key(" ", on_space_key_release)
+    # keyboard.on_press_key(" ", on_space_key_press)
+    # keyboard.on_release_key(" ", on_space_key_release)
+    # 使用 pynput 键盘监听
+    listener = pynput_keyboard.Listener(on_press=on_press, on_release=on_release)
+    listener.start()
     subscribe.callback(recv_msg_from_mqtt_callbak, subscribe_topic,
                        hostname=mqtt_info['endpoint'], port=8883, client_id=mqtt_info['client_id'],
                        auth={"username": mqtt_info['username'], "password": mqtt_info['password']}, tls={})
