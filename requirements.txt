@@ -1,0 +1,6 @@
+requests
+paho-mqtt
+pyaudio
+keyboard
+opuslib
+cryptography
