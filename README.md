@@ -7,11 +7,8 @@
 
 ## windows需要安装依赖
 * pip 安装 pyaudio paho pyaudio keyboard opuslib
-* 将libopus_win32_x64.zip解压至C:\Windows\System32目录中
-* 找到opuslib包的__init__.py文件，做如下修改
-```sh\
-lib_location = find_library('libopus')
-```
+* 将opus.dll拷贝到至C:\Windows\System32目录中
+
 ## 启动命令
 ```python
 python py-xiaozhi.py
