@@ -8,7 +8,8 @@
 **测试使用的python 版本为3.12(其它python3应该也可以,没做测试)**
 
 ## windows需要安装依赖
-* pip 安装 pyaudio paho pyaudio keyboard opuslib
+* pip 安装依赖模块
+pip3  install -r requirements.txt
 * 将opus.dll拷贝到至C:\Windows\System32目录中
 
 ## 启动命令
