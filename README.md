@@ -5,6 +5,8 @@
 * **注意需要手动修改脚本中的全局变量MAC_ADDR**,以区分不同的客户端</br>
 * **按住空格键发起对话**
 
+**测试使用的python 版本为3.12(其它python3应该也可以,没做测试)**
+
 ## windows需要安装依赖
 * pip 安装 pyaudio paho pyaudio keyboard opuslib
 * 将opus.dll拷贝到至C:\Windows\System32目录中

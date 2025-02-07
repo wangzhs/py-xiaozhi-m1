@@ -8,9 +8,7 @@ import paho.mqtt.publish as publish
 import threading
 import pyaudio
 import keyboard
-# https://github.com/shardlab/discordrb/wiki/Installing-libopus 拷贝到C:\Windows\System32
-# 修改 opuslib __init__.py lib_location = find_library('libopus')
-import opuslib
+import opuslib  # 需要将opus.dll 拷贝到C:\Windows\System32
 import socket
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
