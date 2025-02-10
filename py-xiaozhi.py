@@ -7,8 +7,7 @@ import paho.mqtt.subscribe as subscribe
 import paho.mqtt.publish as publish
 import threading
 import pyaudio
-import keyboard
-import opuslib  # 需要将opus.dll 拷贝到C:\Windows\System32
+import opuslib  # windwos平台需要将opus.dll 拷贝到C:\Windows\System32
 import socket
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
@@ -52,13 +51,14 @@ goodbye_msg = {"session_id": "b23ebfe9", "type": "goodbye"}
 local_sequence = 0
 listen_state = None
 tts_state = None
-key_state= None
+key_state = None
 audio = None
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # udp_socket.setblocking(False)
 conn_state = False
 recv_audio_thread = threading.Thread()
 send_audio_thread = threading.Thread()
+
 
 def get_ota_version():
     global mqtt_info
@@ -75,13 +75,15 @@ def get_ota_version():
                                      {"label": "otadata", "type": 1, "subtype": 0, "address": 53248, "size": 8192},
                                      {"label": "phy_init", "type": 1, "subtype": 1, "address": 61440, "size": 4096},
                                      {"label": "model", "type": 1, "subtype": 130, "address": 65536, "size": 983040},
-                                     {"label": "storage", "type": 1, "subtype": 130, "address": 1048576, "size": 1048576},
+                                     {"label": "storage", "type": 1, "subtype": 130, "address": 1048576,
+                                      "size": 1048576},
                                      {"label": "factory", "type": 0, "subtype": 0, "address": 2097152, "size": 4194304},
                                      {"label": "ota_0", "type": 0, "subtype": 16, "address": 6291456, "size": 4194304},
-                                     {"label": "ota_1", "type": 0, "subtype": 17, "address": 10485760, "size": 4194304}],
+                                     {"label": "ota_1", "type": 0, "subtype": 17, "address": 10485760,
+                                      "size": 4194304}],
                  "ota": {"label": "factory"},
                  "board": {"type": "bread-compact-wifi", "ssid": "mzy", "rssi": -58, "channel": 6,
-                           "ip": "192.168.124.38","mac":"cc:ba:97:20:b4:bc"}}
+                           "ip": "192.168.124.38", "mac": "cc:ba:97:20:b4:bc"}}
 
     response = requests.post(OTA_VERSION_URL, headers=header, data=json.dumps(post_data))
     print('=========================')
@@ -164,8 +166,8 @@ def recv_audio():
             # print(f"split_encrypt_encoded_data_nonce: {split_encrypt_encoded_data_nonce.hex()}")
             split_encrypt_encoded_data = encrypt_encoded_data[16:]
             decrypt_data = aes_ctr_decrypt(bytes.fromhex(key),
-                                            split_encrypt_encoded_data_nonce,
-                                            split_encrypt_encoded_data)
+                                           split_encrypt_encoded_data_nonce,
+                                           split_encrypt_encoded_data)
             # 解码播放音频数据
             spk.write(decoder.decode(decrypt_data, frame_num))
     # except BlockingIOError:
@@ -280,25 +282,25 @@ def test_audio():
 
 
 def on_space_key_press(event):
-    global key_state,udp_socket,aes_opus_info,listen_state, conn_state
+    global key_state, udp_socket, aes_opus_info, listen_state, conn_state
     if key_state == "press":
         return
     key_state = "press"
     # 判断是否需要发送hello消息
-    if conn_state == False or aes_opus_info['session_id'] is None:
+    if conn_state is False or aes_opus_info['session_id'] is None:
         conn_state = True
         # 发送hello消息,建立udp连接
         hello_msg = {"type": "hello", "version": 3, "transport": "udp",
-                        "audio_params": {"format": "opus", "sample_rate": 16000, "channels": 1, "frame_duration": 60}}
+                     "audio_params": {"format": "opus", "sample_rate": 16000, "channels": 1, "frame_duration": 60}}
         push_mqtt_msg(hello_msg)
         print(f"send hello message: {hello_msg}")
-    if tts_state == "start" or tts_state =="entence_start":
+    if tts_state == "start" or tts_state == "entence_start":
         # 在播放状态下发送abort消息
         push_mqtt_msg({"type": "abort"})
         print(f"send abort message")
     if aes_opus_info['session_id'] is not None:
         # 发送start listen消息
-        msg = {"session_id": aes_opus_info['session_id'],"type":"listen","state":"start","mode":"manual"}
+        msg = {"session_id": aes_opus_info['session_id'], "type": "listen", "state": "start", "mode": "manual"}
         print(f"send start listen message: {msg}")
         push_mqtt_msg(msg)
 
@@ -308,7 +310,7 @@ def on_space_key_release(event):
     key_state = "release"
     # 发送stop listen消息
     if aes_opus_info['session_id'] is not None:
-        msg = {"session_id": aes_opus_info['session_id'],"type":"listen","state":"stop"}
+        msg = {"session_id": aes_opus_info['session_id'], "type": "listen", "state": "stop"}
         print(f"send stop listen message: {msg}")
         push_mqtt_msg(msg)
 
@@ -317,12 +319,15 @@ def on_press(key):
     if key == pynput_keyboard.Key.space:
         on_space_key_press(None)
 
+
 def on_release(key):
     if key == pynput_keyboard.Key.space:
         on_space_key_release(None)
     # Stop listener
     if key == pynput_keyboard.Key.esc:
         return False
+
+
 def run():
     global mqtt_info
     # 获取mqtt与版本信息
