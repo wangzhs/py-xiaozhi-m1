@@ -3,8 +3,7 @@
 import json
 import time
 import requests
-import paho.mqtt.subscribe as subscribe
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 import threading
 import pyaudio
 import opuslib  # windwos平台需要将opus.dll 拷贝到C:\Windows\System32
@@ -16,7 +15,7 @@ import logging
 from pynput import keyboard as pynput_keyboard
 
 OTA_VERSION_URL = 'https://api.tenclass.net/xiaozhi/ota/'
-MAC_ADDR = 'cd:62:94:2d:b4:ba'
+MAC_ADDR = 'cd:62:f4:3d:b4:ba'
 # {"mqtt":{"endpoint":"post-cn-apg3xckag01.mqtt.aliyuncs.com","client_id":"GID_test@@@cc_ba_97_20_b4_bc",
 # "username":"Signature|LTAI5tF8J3CrdWmRiuTjxHbF|post-cn-apg3xckag01","password":"0mrkMFELXKyelhuYy2FpGDeCigU=",
 # "publish_topic":"device-server","subscribe_topic":"devices"},"firmware":{"version":"0.9.9","url":""}}
@@ -58,6 +57,7 @@ udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 conn_state = False
 recv_audio_thread = threading.Thread()
 send_audio_thread = threading.Thread()
+mqttc = None
 
 
 def get_ota_version():
@@ -181,7 +181,7 @@ def recv_audio():
         spk.close()
 
 
-def recv_msg_from_mqtt_callbak(client, userdata, message):
+def on_message(client, userdata, message):
     global aes_opus_info, udp_socket, tts_state, recv_audio_thread, send_audio_thread
     msg = json.loads(message.payload)
     print(f"recv msg: {msg}")
@@ -217,11 +217,16 @@ def recv_msg_from_mqtt_callbak(client, userdata, message):
         aes_opus_info['session_id'] = None
 
 
+def on_connect(client, userdata, flags, rs, pr):
+    subscribe_topic = mqtt_info['subscribe_topic'].split("/")[0] + '/p2p/GID_test@@@' + MAC_ADDR.replace(':', '_')
+    print(f"subscribe topic: {subscribe_topic}")
+    # 订阅主题
+    client.subscribe(subscribe_topic)
+
+
 def push_mqtt_msg(message):
-    global mqtt_info
-    publish.single(mqtt_info['publish_topic'], json.dumps(message), hostname=mqtt_info['endpoint'],
-                   port=8883, client_id=mqtt_info['client_id'], auth={"username": mqtt_info['username'],
-                                                                      "password": mqtt_info['password']}, tls={})
+    global mqtt_info, mqttc
+    mqttc.publish(mqtt_info['publish_topic'], json.dumps(message))
 
 
 def test_aes():
@@ -329,20 +334,21 @@ def on_release(key):
 
 
 def run():
-    global mqtt_info
+    global mqtt_info, mqttc
     # 获取mqtt与版本信息
     get_ota_version()
-    subscribe_topic = mqtt_info['subscribe_topic'].split("/")[0] + '/p2p/GID_test@@@' + MAC_ADDR.replace(':', '_')
-    print(f"subscribe topic: {subscribe_topic}")
     # 监听键盘按键，当按下空格键时，发送listen消息
-    # keyboard.on_press_key(" ", on_space_key_press)
-    # keyboard.on_release_key(" ", on_space_key_release)
-    # 使用 pynput 键盘监听
     listener = pynput_keyboard.Listener(on_press=on_press, on_release=on_release)
     listener.start()
-    subscribe.callback(recv_msg_from_mqtt_callbak, subscribe_topic,
-                       hostname=mqtt_info['endpoint'], port=8883, client_id=mqtt_info['client_id'],
-                       auth={"username": mqtt_info['username'], "password": mqtt_info['password']}, tls={})
+    # 创建客户端实例
+    mqttc = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2, client_id=mqtt_info['client_id'])
+    mqttc.username_pw_set(username=mqtt_info['username'], password=mqtt_info['password'])
+    mqttc.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=mqtt.ssl.CERT_REQUIRED,
+                  tls_version=mqtt.ssl.PROTOCOL_TLS, ciphers=None)
+    mqttc.on_connect = on_connect
+    mqttc.on_message = on_message
+    mqttc.connect(host=mqtt_info['endpoint'], port=8883)
+    mqttc.loop_forever()
 
 
 if __name__ == "__main__":
