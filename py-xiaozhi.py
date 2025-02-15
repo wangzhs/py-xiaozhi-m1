@@ -218,10 +218,11 @@ def on_message(client, userdata, message):
 
 
 def on_connect(client, userdata, flags, rs, pr):
-    subscribe_topic = mqtt_info['subscribe_topic'].split("/")[0] + '/p2p/GID_test@@@' + MAC_ADDR.replace(':', '_')
-    print(f"subscribe topic: {subscribe_topic}")
+    # subscribe_topic = mqtt_info['subscribe_topic'].split("/")[0] + '/p2p/GID_test@@@' + MAC_ADDR.replace(':', '_')
+    # print(f"subscribe topic: {subscribe_topic}")
     # 订阅主题
-    client.subscribe(subscribe_topic)
+    # client.subscribe(subscribe_topic)
+    print("connect to mqtt server")
 
 
 def push_mqtt_msg(message):
