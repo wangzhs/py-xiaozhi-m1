@@ -20,6 +20,9 @@ python py-xiaozhi.py
 # py-xiaozhi-m1
 **万分感谢原作者的贡献**
 
+## 小智官网
+https://xiaozhi.me/
+
 ## 修改点
 1. 使用3.11.xx版本的python
 2. 使用1.7.6版本的pynput
