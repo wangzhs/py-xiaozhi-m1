@@ -9,10 +9,28 @@
 
 ## windows需要安装依赖
 * pip 安装依赖模块
-pip3  install -r requirements.txt
+  pip3  install -r requirements.txt
 * 将opus.dll拷贝到至C:\Windows\System32目录中
 
 ## 启动命令
 ```python
 python py-xiaozhi.py
 ```
+
+# py-xiaozhi-m1
+**万分感谢原作者的贡献**
+
+## 修改点
+1. 使用3.11.xx版本的python
+2. 使用1.7.6版本的pynput
+3. 修改py-xiaozhi.py文件中的sent = udp_socket.sendto(data, (server_ip, server_port)) 为sent = udp_socket.send(data)
+
+## 操作步骤
+1. 创建虚拟环境
+   python3.11 -m venv py-xiaozhi3.11
+2. 激活虚拟环境
+   source py-xiaozhi3.11/bin/activate
+3. 安装依赖
+   pip3  install -r requirements.txt
+4. 运行脚本
+   python3 py-xiaozhi.py
