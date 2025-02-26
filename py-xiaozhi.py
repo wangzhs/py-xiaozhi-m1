@@ -132,8 +132,7 @@ def send_audio():
             # 加密数据，添加nonce
             encrypt_encoded_data = aes_ctr_encrypt(bytes.fromhex(key), bytes.fromhex(new_nonce), bytes(encoded_data))
             data = bytes.fromhex(new_nonce) + encrypt_encoded_data
-            # sent = udp_socket.sendto(data, (server_ip, server_port))
-            sent = udp_socket.send(data)
+            sent = udp_socket.sendto(data, (server_ip, server_port))
     except Exception as e:
         print(f"send audio err: {e}")
     finally:
